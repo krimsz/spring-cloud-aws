@@ -15,11 +15,12 @@
  */
 package io.awspring.cloud.autoconfigure.core;
 
-import static io.awspring.cloud.autoconfigure.core.AwsProperties.CONFIG_PREFIX;
-
-import java.net.URI;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.lang.Nullable;
+
+import java.net.URI;
+
+import static io.awspring.cloud.autoconfigure.core.AwsProperties.CONFIG_PREFIX;
 
 /**
  * Configuration properties for AWS environment.
@@ -41,11 +42,23 @@ public class AwsProperties {
 	private URI endpoint;
 
 	@Nullable
+	private Boolean metricsEnabled;
+
+	@Nullable
 	public URI getEndpoint() {
 		return endpoint;
 	}
 
 	public void setEndpoint(@Nullable URI endpoint) {
 		this.endpoint = endpoint;
+	}
+
+	@Nullable
+	public Boolean getMetricsEnabled() {
+		return metricsEnabled;
+	}
+
+	public void setMetricsEnabled(@Nullable Boolean metricsEnabled) {
+		this.metricsEnabled = metricsEnabled;
 	}
 }

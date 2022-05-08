@@ -16,11 +16,11 @@
 package io.awspring.cloud.autoconfigure.ses;
 
 import io.awspring.cloud.autoconfigure.core.AwsClientBuilderConfigurer;
+import io.awspring.cloud.autoconfigure.core.AwsProperties;
 import io.awspring.cloud.autoconfigure.core.CredentialsProviderAutoConfiguration;
 import io.awspring.cloud.autoconfigure.core.RegionProviderAutoConfiguration;
 import io.awspring.cloud.ses.SimpleEmailServiceJavaMailSender;
 import io.awspring.cloud.ses.SimpleEmailServiceMailSender;
-import javax.mail.Session;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -32,7 +32,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
+import software.amazon.awssdk.metrics.MetricPublisher;
 import software.amazon.awssdk.services.ses.SesClient;
+
+import javax.mail.Session;
+import java.util.Optional;
 
 /**
  * {@link EnableAutoConfiguration} for {@link SimpleEmailServiceMailSender} and
@@ -43,16 +47,29 @@ import software.amazon.awssdk.services.ses.SesClient;
  * @author Arun Patra
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(SesProperties.class)
+@EnableConfigurationProperties({ SesProperties.class, AwsProperties.class })
 @ConditionalOnClass({ SesClient.class, MailSender.class, SimpleEmailServiceJavaMailSender.class })
 @AutoConfigureAfter({ CredentialsProviderAutoConfiguration.class, RegionProviderAutoConfiguration.class })
 @ConditionalOnProperty(name = "spring.cloud.aws.ses.enabled", havingValue = "true", matchIfMissing = true)
 public class SesAutoConfiguration {
+	private final AwsProperties awsProperties;
+
+	public SesAutoConfiguration(AwsProperties awsProperties) {
+		this.awsProperties = awsProperties;
+	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	public SesClient sesClient(SesProperties properties, AwsClientBuilderConfigurer awsClientBuilderConfigurer) {
-		return (SesClient) awsClientBuilderConfigurer.configure(SesClient.builder(), properties).build();
+	public SesClient sesClient(SesProperties properties, AwsClientBuilderConfigurer awsClientBuilderConfigurer,
+			Optional<MetricPublisher> metricPublisher) {
+		if (awsProperties.getMetricsEnabled() == null || awsProperties.getMetricsEnabled()) {
+			return (SesClient) awsClientBuilderConfigurer
+					.configure(SesClient.builder(), properties, metricPublisher).build();
+		}
+		else {
+			return (SesClient) awsClientBuilderConfigurer.configure(SesClient.builder(), properties, Optional.empty())
+					.build();
+		}
 	}
 
 	@Bean

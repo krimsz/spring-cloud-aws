@@ -19,6 +19,7 @@ import static io.awspring.cloud.sns.configuration.NotificationHandlerMethodArgum
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.autoconfigure.core.AwsClientBuilderConfigurer;
+import io.awspring.cloud.autoconfigure.core.AwsProperties;
 import io.awspring.cloud.autoconfigure.core.CredentialsProviderAutoConfiguration;
 import io.awspring.cloud.autoconfigure.core.RegionProviderAutoConfiguration;
 import io.awspring.cloud.sns.core.SnsTemplate;
@@ -36,6 +37,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import software.amazon.awssdk.metrics.MetricPublisher;
+import software.amazon.awssdk.metrics.publishers.cloudwatch.CloudWatchMetricPublisher;
 import software.amazon.awssdk.services.sns.SnsClient;
 
 /**
@@ -50,21 +53,31 @@ import software.amazon.awssdk.services.sns.SnsClient;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ SnsClient.class, SnsTemplate.class })
-@EnableConfigurationProperties({ SnsProperties.class })
+@EnableConfigurationProperties({ SnsProperties.class, AwsProperties.class })
 @AutoConfigureAfter({ CredentialsProviderAutoConfiguration.class, RegionProviderAutoConfiguration.class })
 @ConditionalOnProperty(name = "spring.cloud.aws.sns.enabled", havingValue = "true", matchIfMissing = true)
 public class SnsAutoConfiguration {
 
 	private final SnsProperties properties;
+	private final AwsProperties awsProperties;
 
-	public SnsAutoConfiguration(SnsProperties properties) {
+	public SnsAutoConfiguration(SnsProperties properties, AwsProperties awsProperties) {
 		this.properties = properties;
+		this.awsProperties = awsProperties;
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public SnsClient snsClient(AwsClientBuilderConfigurer awsClientBuilderConfigurer) {
-		return (SnsClient) awsClientBuilderConfigurer.configure(SnsClient.builder(), this.properties).build();
+	public SnsClient snsClient(AwsClientBuilderConfigurer awsClientBuilderConfigurer,
+			Optional<MetricPublisher> metricPublisher) {
+		if (awsProperties.getMetricsEnabled() == null || awsProperties.getMetricsEnabled()) {
+			return (SnsClient) awsClientBuilderConfigurer
+					.configure(SnsClient.builder(), this.properties, metricPublisher).build();
+		}
+		else {
+			return (SnsClient) awsClientBuilderConfigurer
+					.configure(SnsClient.builder(), this.properties, Optional.empty()).build();
+		}
 	}
 
 	@ConditionalOnMissingBean

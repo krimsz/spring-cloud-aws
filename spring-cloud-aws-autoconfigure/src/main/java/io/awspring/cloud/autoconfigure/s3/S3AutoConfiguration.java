@@ -29,7 +29,6 @@ import io.awspring.cloud.s3.S3OutputStreamProvider;
 import io.awspring.cloud.s3.S3ProtocolResolver;
 import io.awspring.cloud.s3.S3Template;
 import io.awspring.cloud.s3.crossregion.CrossRegionS3Client;
-import java.util.Optional;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -41,9 +40,12 @@ import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import software.amazon.awssdk.metrics.MetricPublisher;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3Configuration;
+
+import java.util.Optional;
 
 /**
  * {@link EnableAutoConfiguration} for {@link S3Client} and {@link S3ProtocolResolver}.
@@ -58,16 +60,26 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 public class S3AutoConfiguration {
 
 	private final S3Properties properties;
+	private final AwsProperties awsProperties;
 
-	public S3AutoConfiguration(S3Properties properties) {
+	public S3AutoConfiguration(AwsProperties awsProperties, S3Properties properties) {
 		this.properties = properties;
+		this.awsProperties = awsProperties;
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	S3ClientBuilder s3ClientBuilder(AwsClientBuilderConfigurer awsClientBuilderConfigurer) {
-		S3ClientBuilder builder = (S3ClientBuilder) awsClientBuilderConfigurer.configure(S3Client.builder(),
-				this.properties);
+	S3ClientBuilder s3ClientBuilder(AwsClientBuilderConfigurer awsClientBuilderConfigurer,
+			Optional<MetricPublisher> metricPublisher) {
+		S3ClientBuilder builder;
+		if (awsProperties.getMetricsEnabled() == null || awsProperties.getMetricsEnabled()) {
+			builder = (S3ClientBuilder) awsClientBuilderConfigurer.configure(S3Client.builder(), this.properties,
+					metricPublisher);
+		}
+		else {
+			builder = (S3ClientBuilder) awsClientBuilderConfigurer.configure(S3Client.builder(), this.properties,
+					Optional.empty());
+		}
 		builder.serviceConfiguration(s3ServiceConfiguration());
 		return builder;
 	}

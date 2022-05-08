@@ -35,12 +35,13 @@ public final class SpringCloudClientConfiguration {
 	private static final String NAME = "spring-cloud-aws";
 
 	private final String version;
-	private final ClientOverrideConfiguration clientOverrideConfiguration;
+	private final ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder;
 
 	public SpringCloudClientConfiguration(String version) {
 		this.version = version;
-		this.clientOverrideConfiguration = ClientOverrideConfiguration.builder()
-				.putAdvancedOption(SdkAdvancedClientOption.USER_AGENT_SUFFIX, getUserAgent()).build();
+		ClientOverrideConfiguration.Builder builder = ClientOverrideConfiguration.builder();
+		this.clientOverrideConfigurationBuilder = builder.putAdvancedOption(SdkAdvancedClientOption.USER_AGENT_SUFFIX,
+				getUserAgent());
 	}
 
 	public SpringCloudClientConfiguration() {
@@ -59,8 +60,8 @@ public final class SpringCloudClientConfiguration {
 		}
 	}
 
-	public ClientOverrideConfiguration clientOverrideConfiguration() {
-		return clientOverrideConfiguration;
+	public ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder() {
+		return clientOverrideConfigurationBuilder;
 	}
 
 	private String getUserAgent() {
