@@ -15,7 +15,9 @@
  */
 package io.awspring.cloud.autoconfigure.core;
 
+import io.awspring.cloud.autoconfigure.MetricsProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.lang.Nullable;
 
 import java.net.URI;
@@ -41,8 +43,9 @@ public class AwsProperties {
 	@Nullable
 	private URI endpoint;
 
+	@NestedConfigurationProperty
 	@Nullable
-	private Boolean metricsEnabled;
+	private MetricsProperties metrics;
 
 	@Nullable
 	public URI getEndpoint() {
@@ -54,11 +57,11 @@ public class AwsProperties {
 	}
 
 	@Nullable
-	public Boolean getMetricsEnabled() {
-		return metricsEnabled;
+	public MetricsProperties getMetrics() {
+		return metrics;
 	}
 
-	public void setMetricsEnabled(@Nullable Boolean metricsEnabled) {
-		this.metricsEnabled = metricsEnabled;
+	public void setMetrics(@Nullable MetricsProperties metrics) {
+		this.metrics = metrics;
 	}
 }

@@ -15,31 +15,41 @@
  */
 package io.awspring.cloud.autoconfigure.sns;
 
-import static io.awspring.cloud.sns.configuration.NotificationHandlerMethodArgumentResolverConfigurationUtils.getNotificationHandlerMethodArgumentResolver;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.autoconfigure.core.AwsClientBuilderConfigurer;
 import io.awspring.cloud.autoconfigure.core.AwsProperties;
 import io.awspring.cloud.autoconfigure.core.CredentialsProviderAutoConfiguration;
 import io.awspring.cloud.autoconfigure.core.RegionProviderAutoConfiguration;
+import io.awspring.cloud.autoconfigure.ses.SesAutoConfiguration;
+import io.awspring.cloud.autoconfigure.ses.SesProperties;
 import io.awspring.cloud.sns.core.SnsTemplate;
 import io.awspring.cloud.sns.core.TopicArnResolver;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import software.amazon.awssdk.metrics.MetricPublisher;
 import software.amazon.awssdk.metrics.publishers.cloudwatch.CloudWatchMetricPublisher;
 import software.amazon.awssdk.services.sns.SnsClient;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+
+import static io.awspring.cloud.sns.configuration.NotificationHandlerMethodArgumentResolverConfigurationUtils.getNotificationHandlerMethodArgumentResolver;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for SNS integration.
@@ -59,25 +69,17 @@ import software.amazon.awssdk.services.sns.SnsClient;
 public class SnsAutoConfiguration {
 
 	private final SnsProperties properties;
-	private final AwsProperties awsProperties;
 
-	public SnsAutoConfiguration(SnsProperties properties, AwsProperties awsProperties) {
+	public SnsAutoConfiguration(SnsProperties properties) {
 		this.properties = properties;
-		this.awsProperties = awsProperties;
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
 	public SnsClient snsClient(AwsClientBuilderConfigurer awsClientBuilderConfigurer,
 			Optional<MetricPublisher> metricPublisher) {
-		if (awsProperties.getMetricsEnabled() == null || awsProperties.getMetricsEnabled()) {
-			return (SnsClient) awsClientBuilderConfigurer
-					.configure(SnsClient.builder(), this.properties, metricPublisher).build();
-		}
-		else {
-			return (SnsClient) awsClientBuilderConfigurer
-					.configure(SnsClient.builder(), this.properties, Optional.empty()).build();
-		}
+		return (SnsClient) awsClientBuilderConfigurer.configure(SnsClient.builder(), properties, metricPublisher)
+			.build();
 	}
 
 	@ConditionalOnMissingBean

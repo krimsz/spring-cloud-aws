@@ -37,22 +37,23 @@ public class AwsClientBuilderConfigurer {
 	private final AwsCredentialsProvider credentialsProvider;
 	private final AwsRegionProvider regionProvider;
 	private final AwsProperties awsProperties;
-	private final ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder;
+	private final ClientOverrideConfiguration clientOverrideConfiguration;
 
 	AwsClientBuilderConfigurer(AwsCredentialsProvider credentialsProvider, AwsRegionProvider regionProvider,
 			AwsProperties awsProperties) {
 		this.credentialsProvider = credentialsProvider;
 		this.regionProvider = regionProvider;
 		this.awsProperties = awsProperties;
-		this.clientOverrideConfigurationBuilder = new SpringCloudClientConfiguration()
-				.clientOverrideConfigurationBuilder();
+		this.clientOverrideConfiguration = new SpringCloudClientConfiguration()
+				.clientOverrideConfiguration();
 	}
 
 	public AwsClientBuilder<?, ?> configure(AwsClientBuilder<?, ?> builder, AwsClientProperties clientProperties,
 			Optional<MetricPublisher> metricPublisher) {
-		metricPublisher.ifPresent(clientOverrideConfigurationBuilder::addMetricPublisher);
+		ClientOverrideConfiguration.Builder overrideBuilder = clientOverrideConfiguration.toBuilder();
+		metricPublisher.ifPresent(overrideBuilder::addMetricPublisher);
 		builder.credentialsProvider(credentialsProvider).region(resolveRegion(clientProperties))
-				.overrideConfiguration(clientOverrideConfigurationBuilder.build());
+				.overrideConfiguration(overrideBuilder.build());
 		Optional.ofNullable(awsProperties.getEndpoint()).ifPresent(builder::endpointOverride);
 		Optional.ofNullable(clientProperties.getEndpoint()).ifPresent(builder::endpointOverride);
 		return builder;

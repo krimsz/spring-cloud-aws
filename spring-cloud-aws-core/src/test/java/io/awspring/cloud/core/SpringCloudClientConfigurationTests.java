@@ -30,10 +30,10 @@ class SpringCloudClientConfigurationTests {
 
 	@Test
 	void returnsClientConfigurationWithVersion() {
-		ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder = new SpringCloudClientConfiguration()
-				.clientOverrideConfigurationBuilder();
+		ClientOverrideConfiguration clientOverrideConfiguration = new SpringCloudClientConfiguration()
+				.clientOverrideConfiguration();
 
-		assertThat(clientOverrideConfigurationBuilder.build().advancedOption(SdkAdvancedClientOption.USER_AGENT_SUFFIX))
+		assertThat(clientOverrideConfiguration.advancedOption(SdkAdvancedClientOption.USER_AGENT_SUFFIX))
 				.isPresent().hasValueSatisfying(value -> {
 					assertThat(value).startsWith("spring-cloud-aws");
 				});

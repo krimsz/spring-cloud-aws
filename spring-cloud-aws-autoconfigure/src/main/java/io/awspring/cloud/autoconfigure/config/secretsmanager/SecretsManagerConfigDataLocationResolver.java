@@ -55,12 +55,14 @@ public class SecretsManagerConfigDataLocationResolver
 	public List<SecretsManagerConfigDataResource> resolveProfileSpecific(
 			ConfigDataLocationResolverContext resolverContext, ConfigDataLocation location, Profiles profiles)
 			throws ConfigDataLocationNotFoundException {
-		registerBean(resolverContext, AwsProperties.class, loadAwsProperties(resolverContext.getBinder()));
-		registerBean(resolverContext, SecretsManagerProperties.class, loadProperties(resolverContext.getBinder()));
+		SecretsManagerProperties secretsManagerProperties = loadProperties(resolverContext.getBinder());
+		AwsProperties awsProperties = loadAwsProperties(resolverContext.getBinder());
+		registerBean(resolverContext, AwsProperties.class, awsProperties);
+		registerBean(resolverContext, SecretsManagerProperties.class, secretsManagerProperties);
 		registerBean(resolverContext, CredentialsProperties.class,
 				loadCredentialsProperties(resolverContext.getBinder()));
 		registerBean(resolverContext, RegionProperties.class, loadRegionProperties(resolverContext.getBinder()));
-		createMetricPublisher(resolverContext);
+		createMetricPublisher(resolverContext, secretsManagerProperties, awsProperties);
 		registerAndPromoteBean(resolverContext, SecretsManagerClient.class, this::createAwsSecretsManagerClient);
 		SecretsManagerPropertySources propertySources = new SecretsManagerPropertySources();
 
