@@ -16,34 +16,26 @@
 package io.awspring.cloud.autoconfigure.ses;
 
 import io.awspring.cloud.autoconfigure.core.AwsClientBuilderConfigurer;
-import io.awspring.cloud.autoconfigure.core.AwsProperties;
+import io.awspring.cloud.autoconfigure.core.AwsClientCustomizer;
 import io.awspring.cloud.autoconfigure.core.CredentialsProviderAutoConfiguration;
 import io.awspring.cloud.autoconfigure.core.RegionProviderAutoConfiguration;
 import io.awspring.cloud.ses.SimpleEmailServiceJavaMailSender;
 import io.awspring.cloud.ses.SimpleEmailServiceMailSender;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
-import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import software.amazon.awssdk.metrics.MetricPublisher;
-import software.amazon.awssdk.metrics.publishers.cloudwatch.CloudWatchMetricPublisher;
 import software.amazon.awssdk.services.ses.SesClient;
-
-import javax.mail.Session;
-import java.time.Duration;
-import java.util.Optional;
+import software.amazon.awssdk.services.ses.SesClientBuilder;
 
 /**
  * {@link EnableAutoConfiguration} for {@link SimpleEmailServiceMailSender} and
@@ -54,17 +46,19 @@ import java.util.Optional;
  * @author Arun Patra
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({ SesProperties.class, AwsProperties.class })
+@EnableConfigurationProperties(SesProperties.class)
 @ConditionalOnClass({ SesClient.class, MailSender.class, SimpleEmailServiceJavaMailSender.class })
 @AutoConfigureAfter({ CredentialsProviderAutoConfiguration.class, RegionProviderAutoConfiguration.class })
 @ConditionalOnProperty(name = "spring.cloud.aws.ses.enabled", havingValue = "true", matchIfMissing = true)
 public class SesAutoConfiguration {
+
 	@Bean
 	@ConditionalOnMissingBean
 	public SesClient sesClient(SesProperties properties, AwsClientBuilderConfigurer awsClientBuilderConfigurer,
-			Optional<MetricPublisher> metricPublisher) {
-		return (SesClient) awsClientBuilderConfigurer.configure(SesClient.builder(), properties, metricPublisher)
-				.build();
+			ObjectProvider<AwsClientCustomizer<SesClientBuilder>> configurer,
+			ObjectProvider<MetricPublisher> metricPublisher) {
+		return awsClientBuilderConfigurer.configure(SesClient.builder(), properties, configurer.getIfAvailable(),
+				metricPublisher.getIfAvailable()).build();
 	}
 
 	@Bean
@@ -74,7 +68,7 @@ public class SesAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnClass(Session.class)
+	@ConditionalOnClass(name = "javax.mail.Session")
 	public JavaMailSender javaMailSender(SesClient sesClient) {
 		return new SimpleEmailServiceJavaMailSender(sesClient);
 	}

@@ -1,12 +1,12 @@
 # 🍃 Spring Cloud AWS
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/awspring/spring-cloud-aws)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
 
 Simplifies using AWS managed services in a Spring and Spring Boot applications.
 
 For a deep dive into the project, refer to the Spring Cloud AWS Reference documentation:
 
-- [Spring Cloud AWS 3.0.0-SNAPSHOT](https://docs.awspring.io/spring-cloud-aws/docs/3.0.0-SNAPSHOT/reference/html/index.html)
+- [Spring Cloud AWS 3.0.0-M1](https://docs.awspring.io/spring-cloud-aws/docs/3.0.0-M1/reference/html/index.html)
 - [Spring Cloud AWS 2.4.1](https://docs.awspring.io/spring-cloud-aws/docs/2.4.1/reference/html/index.html)
 - [Spring Cloud AWS 2.3.5](https://docs.awspring.io/spring-cloud-aws/docs/2.3.5/reference/html/index.html)
 
@@ -23,8 +23,8 @@ This project has dependency and transitive dependencies on Spring Projects. The 
 | Spring Cloud AWS          | Spring Cloud                                                                                                          | Spring Boot  | Spring Framework | AWS Java SDK |
 |---------------------------|-----------------------------------------------------------------------------------------------------------------------|--------------|------------------|--------------|
 | 2.3.x (maintenance mode)  | [2020.0.x](https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2020.0-Release-Notes) (3.0/Illford) | 2.4.x, 2.5.x | 5.3.x            | 1.x          |
-| 2.4.x (maintenance mode)  | [2021.0.x](https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2021.0-Release-Notes) (3.1/Jubilee) | 2.6.x        | 5.3.x            | 1.x          |
-| 3.0.x (under development) | [2021.0.x](https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2021.0-Release-Notes) (3.1/Jubilee) | 2.6.x        | 5.3.x            | 2.x          |
+| 2.4.x (maintenance mode)  | [2021.0.x](https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2021.0-Release-Notes) (3.1/Jubilee) | 2.6.x, 2.7.x        | 5.3.x            | 1.x          |
+| 3.0.x (under development) | [2021.0.x](https://github.com/spring-cloud/spring-cloud-release/wiki/Spring-Cloud-2021.0-Release-Notes) (3.1/Jubilee) | 2.6.x, 2.7.x        | 5.3.x            | 2.x          |
 
 ## Supported AWS integrations
 
@@ -35,7 +35,7 @@ This project has dependency and transitive dependencies on Spring Projects. The 
 | SES             | ✅                    | ✅                                                                         |
 | Parameter Store | ✅                    | ✅                                                                         |
 | Secrets Manager | ✅                    | ✅                                                                         |
-| SQS             | ✅                    | TODO [#344](https://github.com/awspring/spring-cloud-aws/issues/344)       |
+| SQS             | ✅                    | In Progress [#344](https://github.com/awspring/spring-cloud-aws/pull/374)       |
 | RDS             | ✅                    | TODO [#322](https://github.com/awspring/spring-cloud-aws/issues/322)      |
 | EC2             | ✅                    | ❌                                                                         |
 | ElastiCache     | ✅                    | ❌                                                                         |

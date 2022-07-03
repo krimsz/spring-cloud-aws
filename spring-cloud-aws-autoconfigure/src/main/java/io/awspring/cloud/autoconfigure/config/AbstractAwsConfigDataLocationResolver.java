@@ -22,6 +22,10 @@ import io.awspring.cloud.autoconfigure.core.CredentialsProviderAutoConfiguration
 import io.awspring.cloud.autoconfigure.core.RegionProperties;
 import io.awspring.cloud.autoconfigure.core.RegionProviderAutoConfiguration;
 import io.awspring.cloud.core.SpringCloudClientConfiguration;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.springframework.boot.BootstrapContext;
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.ConfigurableBootstrapContext;
@@ -45,12 +49,6 @@ import software.amazon.awssdk.metrics.publishers.cloudwatch.CloudWatchMetricPubl
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 /**
  * Base class for AWS specific {@link ConfigDataLocationResolver}s.
  *
@@ -62,7 +60,11 @@ public abstract class AbstractAwsConfigDataLocationResolver<T extends ConfigData
 		implements ConfigDataLocationResolver<T> {
 
 	protected abstract String getPrefix();
-	private final boolean CLOUDWATCH_METRICS_PUBLISHER_IN_CLASSPATH = ClassUtils.isPresent("software.amazon.awssdk.metrics.publishers.cloudwatch.CloudWatchMetricPublisher", getClass().getClassLoader());
+
+	private final boolean CLOUDWATCH_METRICS_PUBLISHER_IN_CLASSPATH = ClassUtils.isPresent(
+			"software.amazon.awssdk.metrics.publishers.cloudwatch.CloudWatchMetricPublisher",
+			getClass().getClassLoader());
+
 	@Override
 	public boolean isResolvable(ConfigDataLocationResolverContext context, ConfigDataLocation location) {
 		return location.hasPrefix(getPrefix());
@@ -160,28 +162,28 @@ public abstract class AbstractAwsConfigDataLocationResolver<T extends ConfigData
 		}
 		builder.credentialsProvider(credentialsProvider);
 
-		Optional<MetricPublisher> metricPublisher = Optional.empty();
-		if(CLOUDWATCH_METRICS_PUBLISHER_IN_CLASSPATH) {
-			metricPublisher = Optional.of(context.get(MetricPublisher.class));
+		if (CLOUDWATCH_METRICS_PUBLISHER_IN_CLASSPATH) {
+			ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder = new SpringCloudClientConfiguration()
+					.clientOverrideConfiguration().toBuilder();
+			clientOverrideConfigurationBuilder.addMetricPublisher(context.get(MetricPublisher.class));
+			builder.overrideConfiguration(clientOverrideConfigurationBuilder.build());
 		}
-		ClientOverrideConfiguration.Builder clientOverrideConfigurationBuilder = new SpringCloudClientConfiguration()
-				.clientOverrideConfiguration().toBuilder();
-		clientOverrideConfigurationBuilder.addMetricPublisher(metricPublisher.get());
-		builder.overrideConfiguration(clientOverrideConfigurationBuilder.build());
+
 		return builder;
 	}
 
-
-	protected void createMetricPublisher(ConfigDataLocationResolverContext resolverContext, AwsClientProperties properties, AwsProperties awsProperties) {
-		if(!CLOUDWATCH_METRICS_PUBLISHER_IN_CLASSPATH) {
+	protected void createMetricPublisherBean(ConfigDataLocationResolverContext resolverContext,
+			AwsProperties awsProperties) {
+		if (!CLOUDWATCH_METRICS_PUBLISHER_IN_CLASSPATH) {
 			return;
 		}
 
 		CloudWatchMetricPublisher.Builder builder = CloudWatchMetricPublisher.builder();
-		if(awsProperties != null && awsProperties.getMetrics() != null && awsProperties.getMetrics().getEnabled()!=null && awsProperties.getMetrics().getEnabled().equals(false)) {
+		if (awsProperties != null && awsProperties.getMetrics() != null && ((awsProperties.getMetrics().getEnabled()==null) || awsProperties.getMetrics().getEnabled())) {
 			PropertyMapper map = PropertyMapper.get();
 			map.from(awsProperties.getMetrics()::getNamespace).whenNonNull().to(builder::namespace);
-			map.from(awsProperties.getMetrics()::getUploadFrequencyInSeconds).whenNonNull().to(v -> builder.uploadFrequency(Duration.ofSeconds(v)));
+			map.from(awsProperties.getMetrics()::getUploadFrequencyInSeconds).whenNonNull()
+					.to(v -> builder.uploadFrequency(Duration.ofSeconds(v)));
 			registerBean(resolverContext, MetricPublisher.class, builder.build());
 		}
 	}

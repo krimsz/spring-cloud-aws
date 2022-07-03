@@ -15,6 +15,7 @@
  */
 package io.awspring.cloud.autoconfigure.core;
 
+import java.time.Duration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,8 +27,6 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.metrics.MetricPublisher;
 import software.amazon.awssdk.metrics.publishers.cloudwatch.CloudWatchMetricPublisher;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
-
-import java.time.Duration;
 
 /**
  * Autoconfigures AWS environment.
@@ -53,9 +52,10 @@ public class AwsAutoConfiguration {
 		MetricPublisher cloudWatchMetricPublisher() {
 			CloudWatchMetricPublisher.Builder builder = CloudWatchMetricPublisher.builder();
 			PropertyMapper propertyMapper = PropertyMapper.get();
-			if(awsProperties.getMetrics()!=null) {
+			if (awsProperties!= null && awsProperties.getMetrics() != null) {
 				propertyMapper.from(awsProperties.getMetrics()::getNamespace).whenNonNull().to(builder::namespace);
-				propertyMapper.from(awsProperties.getMetrics()::getUploadFrequencyInSeconds).whenNonNull().to(v -> builder.uploadFrequency(Duration.ofSeconds(v)));
+				propertyMapper.from(awsProperties.getMetrics()::getUploadFrequencyInSeconds).whenNonNull()
+						.to(v -> builder.uploadFrequency(Duration.ofSeconds(v)));
 			}
 			return builder.build();
 		}

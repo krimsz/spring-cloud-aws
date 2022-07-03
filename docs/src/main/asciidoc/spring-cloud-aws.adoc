@@ -21,9 +21,9 @@ Spring Cloud AWS lets you leverage the power and simplicity of the Spring Framew
 - Write and read from Spring Resources backed up by S3
 - Send emails using SES
 - Import environment configuration using https://docs.spring.io/spring-boot/docs/current/api/org/springframework/boot/context/config/ConfigDataLoader.html[ConfigDataLoader] from Parameter Store and Secrets Manager
-- Send and receive HTTP notifications from SNS (TODO)
-- Send metrics data to CloudWatch (TODO)
-- Send and listen to SQS messages (TODO)
+- Send and receive HTTP notifications from SNS
+
+Other integrations are under development.
 
 It also simplifies creating any non-integrated AWS SDK client by auto-configuring region and credentials providers.
 
@@ -90,9 +90,13 @@ A summary of these artifacts are provided below.
 | Provides integrations with SES
 | io.awspring.cloud:spring-cloud-aws-starter-ses
 
+| SNS
+| Provides integrations with SNS
+| io.awspring.cloud:spring-cloud-aws-starter-sns
+
 | Parameter Store
 | Provides integrations with AWS Parameter Store
-| io.awspring.cloud:spring-cloud-aws-starter-paremeter-store
+| io.awspring.cloud:spring-cloud-aws-starter-parameter-store
 
 | Secrets Manager
 | Provides integrations with AWS Secrets manager
@@ -123,14 +127,17 @@ before any other BOM dependency that configures AWS SDK dependencies.
 
 include::core.adoc[]
 
+include::dynamodb.adoc[]
+
 include::s3.adoc[]
+
+include::ses.adoc[]
 
 include::sns.adoc[]
 
 include::secrets-manager.adoc[]
 
 include::parameter-store.adoc[]
-
 
 //
 //===== AWS EKS IAM Roles for Service Accounts configuration

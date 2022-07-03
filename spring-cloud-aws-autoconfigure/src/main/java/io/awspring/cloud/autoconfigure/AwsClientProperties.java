@@ -16,8 +16,6 @@
 package io.awspring.cloud.autoconfigure;
 
 import java.net.URI;
-
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.lang.Nullable;
 
 /**
@@ -41,7 +39,7 @@ public abstract class AwsClientProperties {
 
 	@Nullable
 	public URI getEndpoint() {
-		return endpoint;
+		return this.endpoint;
 	}
 
 	public void setEndpoint(URI endpoint) {
@@ -50,11 +48,10 @@ public abstract class AwsClientProperties {
 
 	@Nullable
 	public String getRegion() {
-		return region;
+		return this.region;
 	}
 
 	public void setRegion(String region) {
 		this.region = region;
 	}
-
 }

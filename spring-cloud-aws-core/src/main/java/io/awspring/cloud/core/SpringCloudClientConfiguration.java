@@ -40,8 +40,8 @@ public final class SpringCloudClientConfiguration {
 	public SpringCloudClientConfiguration(String version) {
 		this.version = version;
 		ClientOverrideConfiguration.Builder builder = ClientOverrideConfiguration.builder();
-		this.clientOverrideConfiguration = builder.putAdvancedOption(SdkAdvancedClientOption.USER_AGENT_SUFFIX,
-				getUserAgent()).build();
+		this.clientOverrideConfiguration = builder
+				.putAdvancedOption(SdkAdvancedClientOption.USER_AGENT_SUFFIX, getUserAgent()).build();
 	}
 
 	public SpringCloudClientConfiguration() {
